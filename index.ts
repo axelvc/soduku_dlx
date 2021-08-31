@@ -3,7 +3,7 @@ class Sudoku {
 
   static blockSize = 3
 
-  solution: number[]
+  solution: number[] = []
 
   saved = { row: 0, col: 0, n: 0 }
 
