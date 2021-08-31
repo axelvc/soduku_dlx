@@ -1,8 +1,10 @@
 /* eslint-disable no-restricted-syntax */
 class Sudoku {
+  static blockSize = 3
+
   static gridSize = 9
 
-  static blockSize = 3
+  static gridLength = Sudoku.gridSize ** 2
 
   solution: number[] = []
 
@@ -171,7 +173,7 @@ class Sudoku {
 
   private fillCell(i: number): boolean {
     // end of the grid
-    if (i === this.solution.length) {
+    if (i === Sudoku.gridLength) {
       return true
     }
 
@@ -194,7 +196,7 @@ class Sudoku {
 
   // clean
   private cleanGrid() {
-    this.solution = Array(Sudoku.gridSize ** 2).fill(0)
+    this.solution = Array(Sudoku.gridLength).fill(0)
   }
 }
 
