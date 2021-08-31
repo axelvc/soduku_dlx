@@ -15,5 +15,6 @@ module.exports = {
     'no-param-reassign': 'off',
     'operator-linebreak': 'off',
     'no-console': 'off',
+    'generator-star-spacing': 'off',
   },
 }

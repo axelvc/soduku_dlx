@@ -5,15 +5,12 @@ class Sudoku {
 
   solution: number[] = []
 
-  saved = { row: 0, col: 0, n: 0 }
-
   constructor() {
     this.create()
   }
 
   create() {
     this.cleanGrid()
-    this.cleanSaved()
     this.fill()
   }
 
@@ -65,34 +62,16 @@ class Sudoku {
     this.solution[Sudoku.getIndex(row, col)] = n
   }
 
-  // saved
-  private isSaved(row: number, col: number, n: number): boolean {
-    const { saved } = this
-
-    return saved.n === n && saved.row === row && saved.col === col
-  }
-
-  private setSaved(row: number, col: number) {
-    this.saved = {
-      row,
-      col,
-      n: this.getCell(row, col),
-    }
-  }
-
-  private recoverSaved() {
-    const { row, col, n } = this.saved
-
-    this.setCell(row, col, n)
-  }
-
   // valiation
   private validLinear(row: number, col: number, n: number): boolean {
     for (let i = 0; i < Sudoku.gridSize; i += 1) {
-      if (
-        this.getCell(row, i) === n || // col
-        this.getCell(i, col) === n // row
-      ) {
+      // row
+      if (this.getCell(i, col) === n) {
+        return false
+      }
+
+      // col
+      if (this.getCell(row, i) === n) {
         return false
       }
     }
@@ -126,9 +105,6 @@ class Sudoku {
   private fill() {
     this.fillDiagonal()
     this.fillCell(0, 0)
-    // this.randomClean(30)
-    this.print()
-    this.randomClean(this.solution.length - 17)
   }
 
   private fillDiagonal() {
@@ -166,7 +142,7 @@ class Sudoku {
     }
 
     for (let n = 1; n <= gridSize; n += 1) {
-      if (!this.isSaved(row, col, n) && this.validFill(row, col, n)) {
+      if (this.validFill(row, col, n)) {
         this.setCell(row, col, n)
 
         if (this.fillCell(row, col + 1)) {
@@ -179,60 +155,9 @@ class Sudoku {
     return false
   }
 
-  private fill() {
-    this.fillDiagonal()
-    this.fillCell(0, 0)
-    this.randomClean(35)
-  }
-
   // clean
   private cleanGrid() {
     this.solution = Array(Sudoku.gridSize ** 2).fill(0)
-  }
-
-  private cleanSaved() {
-    this.saved = {
-      row: 0,
-      col: 0,
-      n: 0,
-    }
-  }
-
-  private randomClean(quantity: number) {
-    const { gridSize } = Sudoku
-    const his: Set<number> = new Set()
-    const limitErrors = this.solution.length - 25
-
-    let i = 0
-    while (i < quantity) {
-      let row: number
-      let col: number
-
-      do {
-        row = Math.floor(Math.random() * gridSize)
-        col = Math.floor(Math.random() * gridSize)
-      } while (
-        this.getCell(row, col) === 0 &&
-        his.has(Sudoku.getIndex(row, col)) &&
-        his.size < limitErrors
-      )
-
-      // console.log({ row, col, i })
-      his.add(Sudoku.getIndex(row, col))
-      this.setSaved(row, col)
-      this.setCell(row, col, 0)
-
-      const snapshot = [...this.solution]
-
-      if (this.fillCell(0, 0)) {
-        this.recoverSaved()
-      } else {
-        i += 1
-      }
-
-      this.solution = snapshot
-      this.cleanSaved()
-    }
   }
 }
 
@@ -241,7 +166,7 @@ const s1 = new Sudoku()
 
 // s1.print()
 
-for (let i = 0; i < 10000; i += 1) {
+for (let i = 0; i < 100000; i += 1) {
   s1.create()
 }
 console.timeEnd('time')
