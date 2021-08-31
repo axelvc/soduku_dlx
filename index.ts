@@ -123,6 +123,14 @@ class Sudoku {
   }
 
   // fill
+  private fill() {
+    this.fillDiagonal()
+    this.fillCell(0, 0)
+    // this.randomClean(30)
+    this.print()
+    this.randomClean(this.solution.length - 17)
+  }
+
   private fillDiagonal() {
     const { gridSize, blockSize } = Sudoku
 
