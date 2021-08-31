@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 class Sudoku {
   static gridSize = 9
 
@@ -50,108 +51,144 @@ class Sudoku {
     // return [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5)
   }
 
-  private static getIndex(row: number, col: number) {
+  private static getIndex(row: number, col: number): number {
     return row * Sudoku.gridSize + col
   }
 
-  private getCell(row: number, col: number): number {
-    return this.solution[Sudoku.getIndex(row, col)]
-  }
+  private static getRowIdxs(i: number): number[] {
+    const { gridSize } = Sudoku
+    const col = i % gridSize
 
-  private setCell(row: number, col: number, n: number) {
-    this.solution[Sudoku.getIndex(row, col)] = n
-  }
-
-  // valiation
-  private validLinear(row: number, col: number, n: number): boolean {
-    for (let i = 0; i < Sudoku.gridSize; i += 1) {
-      // row
-      if (this.getCell(i, col) === n) {
-        return false
-      }
-
-      // col
-      if (this.getCell(row, i) === n) {
-        return false
-      }
+    const idxs = []
+    for (let row = 0; row < gridSize; row += 1) {
+      idxs.push(Sudoku.getIndex(row, col))
     }
 
-    return true
+    return idxs
   }
 
-  private validBlock(row: number, col: number, n: number): boolean {
-    const { blockSize } = Sudoku
-    const rowStart = Math.floor(row / blockSize) * blockSize
-    const colStart = Math.floor(col / blockSize) * blockSize
+  private static getColIdxs(i: number): number[] {
+    const { gridSize } = Sudoku
+    const row = Math.floor(i / gridSize)
+
+    const idxs = []
+    for (let col = 0; col < gridSize; col += 1) {
+      idxs.push(Sudoku.getIndex(row, col))
+    }
+
+    return idxs
+  }
+
+  private static getBlockIdxs(i: number): number[] {
+    const { gridSize, blockSize } = Sudoku
+    const rowI = Math.floor(i / gridSize)
+    const colI = i % gridSize
+    const rowStart = Math.floor(rowI / blockSize) * blockSize
+    const colStart = Math.floor(colI / blockSize) * blockSize
     const rowEnd = rowStart + blockSize
     const colEnd = colStart + blockSize
 
-    for (let rowI = rowStart; rowI < rowEnd; rowI += 1) {
-      for (let colI = colStart; colI < colEnd; colI += 1) {
-        if (this.getCell(rowI, colI) === n) {
-          return false
-        }
+    const idxs = []
+    for (let row = rowStart; row < rowEnd; row += 1) {
+      for (let col = colStart; col < colEnd; col += 1) {
+        idxs.push(Sudoku.getIndex(row, col))
+      }
+    }
+
+    return idxs
+  }
+
+  private getValidValues(i: number): number[] {
+    const nums = []
+
+    for (let n = 1; n <= Sudoku.gridSize; n += 1) {
+      if (this.isValid(i, n)) {
+        nums.push(n)
+      }
+    }
+
+    return nums
+  }
+
+  // valiation
+  private isSame(i: number, n: number) {
+    return this.solution[i] === n
+  }
+
+  private isValidRow(i: number, n: number): boolean {
+    for (const rI of Sudoku.getRowIdxs(i)) {
+      if (this.isSame(rI, n)) {
+        return false
       }
     }
 
     return true
   }
 
-  private validFill(row: number, col: number, n: number): boolean {
-    return this.validLinear(row, col, n) && this.validBlock(row, col, n)
+  private isValidCol(i: number, n: number): boolean {
+    for (const cI of Sudoku.getColIdxs(i)) {
+      if (this.isSame(cI, n)) {
+        return false
+      }
+    }
+
+    return true
+  }
+
+  private validBlock(i: number, n: number): boolean {
+    for (const bI of Sudoku.getBlockIdxs(i)) {
+      if (this.isSame(bI, n)) {
+        return false
+      }
+    }
+
+    return true
+  }
+
+  private isValid(i: number, n: number): boolean {
+    return (
+      this.isValidRow(i, n) && this.isValidCol(i, n) && this.validBlock(i, n)
+    )
   }
 
   // fill
   private fill() {
     this.fillDiagonal()
-    this.fillCell(0, 0)
+    this.fillCell(0)
   }
 
   private fillDiagonal() {
-    const { gridSize, blockSize } = Sudoku
+    const blocks = [0, 30, 60].map(Sudoku.getBlockIdxs)
 
-    for (let start = 0; start < gridSize; start += blockSize) {
-      const end = start + blockSize
+    for (const block of blocks) {
       const nums = Sudoku.randomNums()
 
-      for (let row = start; row < end; row += 1) {
-        for (let col = start; col < end; col += 1) {
-          this.setCell(row, col, nums.pop()!)
-        }
+      for (const i of block) {
+        this.solution[i] = nums.pop()!
       }
     }
   }
 
-  private fillCell(row: number, col: number): boolean {
-    const { gridSize } = Sudoku
-
-    // next row
-    if (col === gridSize) {
-      row += 1
-      col = 0
-    }
-
+  private fillCell(i: number): boolean {
     // end of the grid
-    if (row === gridSize) {
+    if (i === this.solution.length) {
       return true
     }
 
     // pre-filled
-    if (this.getCell(row, col)) {
-      return this.fillCell(row, col + 1)
+    if (this.solution[i]) {
+      return this.fillCell(i + 1)
     }
 
-    for (let n = 1; n <= gridSize; n += 1) {
-      if (this.validFill(row, col, n)) {
-        this.setCell(row, col, n)
+    for (const n of this.getValidValues(i)) {
+      this.solution[i] = n
 
-        if (this.fillCell(row, col + 1)) {
-          return true
-        }
+      if (this.fillCell(i + 1)) {
+        return true
       }
     }
 
-    this.setCell(row, col, 0)
+    this.solution[i] = 0
     return false
   }
 
@@ -166,7 +203,7 @@ const s1 = new Sudoku()
 
 // s1.print()
 
-for (let i = 0; i < 100000; i += 1) {
+for (let i = 0; i < 10000; i += 1) {
   s1.create()
 }
 console.timeEnd('time')
