@@ -13,7 +13,6 @@ class Sudoku {
   }
 
   create() {
-    this.cleanGrid()
     this.fill()
   }
 
@@ -47,7 +46,7 @@ class Sudoku {
     console.log(`└${str}┴${str}┴${str}┘`)
   }
 
-  // utils
+  /* ---------------------------------- utils --------------------------------- */
   private static randomNums(): number[] {
     return [5, 4, 3, 8, 9, 7, 2, 1, 6]
     // return [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5)
@@ -59,10 +58,10 @@ class Sudoku {
 
   private static getRowIdxs(i: number): number[] {
     const { gridSize } = Sudoku
-    const col = i % gridSize
+    const row = Math.floor(i / gridSize)
 
     const idxs = []
-    for (let row = 0; row < gridSize; row += 1) {
+    for (let col = 0; col < gridSize; col += 1) {
       idxs.push(Sudoku.getIndex(row, col))
     }
 
@@ -71,10 +70,10 @@ class Sudoku {
 
   private static getColIdxs(i: number): number[] {
     const { gridSize } = Sudoku
-    const row = Math.floor(i / gridSize)
+    const col = i % gridSize
 
     const idxs = []
-    for (let col = 0; col < gridSize; col += 1) {
+    for (let row = 0; row < gridSize; row += 1) {
       idxs.push(Sudoku.getIndex(row, col))
     }
 
@@ -112,14 +111,10 @@ class Sudoku {
     return nums
   }
 
-  // valiation
-  private isSame(i: number, n: number) {
-    return this.solution[i] === n
-  }
-
+  /* -------------------------------- valiation ------------------------------- */
   private isValidRow(i: number, n: number): boolean {
     for (const rI of Sudoku.getRowIdxs(i)) {
-      if (this.isSame(rI, n)) {
+      if (this.solution[rI] === n) {
         return false
       }
     }
@@ -129,7 +124,7 @@ class Sudoku {
 
   private isValidCol(i: number, n: number): boolean {
     for (const cI of Sudoku.getColIdxs(i)) {
-      if (this.isSame(cI, n)) {
+      if (this.solution[cI] === n) {
         return false
       }
     }
@@ -137,9 +132,9 @@ class Sudoku {
     return true
   }
 
-  private validBlock(i: number, n: number): boolean {
+  private isValidBlock(i: number, n: number): boolean {
     for (const bI of Sudoku.getBlockIdxs(i)) {
-      if (this.isSame(bI, n)) {
+      if (this.solution[bI] === n) {
         return false
       }
     }
@@ -149,16 +144,11 @@ class Sudoku {
 
   private isValid(i: number, n: number): boolean {
     return (
-      this.isValidRow(i, n) && this.isValidCol(i, n) && this.validBlock(i, n)
+      this.isValidRow(i, n) && this.isValidCol(i, n) && this.isValidBlock(i, n)
     )
   }
 
-  // fill
-  private fill() {
-    this.fillDiagonal()
-    this.fillCell(0)
-  }
-
+  /* ---------------------------------- fill ---------------------------------- */
   private fillDiagonal() {
     const blocks = [0, 30, 60].map(Sudoku.getBlockIdxs)
 
@@ -194,18 +184,30 @@ class Sudoku {
     return false
   }
 
-  // clean
-  private cleanGrid() {
+  private fill() {
     this.solution = Array(Sudoku.gridLength).fill(0)
+    this.fillDiagonal()
+    this.fillCell(0)
+  }
+
+  /* ---------------------------------- clean --------------------------------- */
+  /*
+   * TODO: Try to solve, and each iteration say to next if is the same value as the
+   * first solve, if all backtracking it's the same as the first and the current
+   * iteration is the same as the removed value then ignore the current value and
+   * continue to the next number, then return if there are another solution
+   */
+  private clean() {
+    console.log(this.solution)
   }
 }
 
 console.time('time')
-const s1 = new Sudoku()
+const s = new Sudoku()
 
-// s1.print()
+// s.print()
 
-for (let i = 0; i < 10000; i += 1) {
-  s1.create()
+for (let i = 0; i < 1000; i += 1) {
+  s.create()
 }
 console.timeEnd('time')
