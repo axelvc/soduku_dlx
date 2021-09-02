@@ -161,21 +161,18 @@ class Sudoku {
     }
   }
 
-  private fillCell(i: number): boolean {
-    // end of the grid
-    if (i === Sudoku.gridLength) {
-      return true
-    }
+  private fillBlanks(start: number = 0): boolean {
+    const i = this.solution.indexOf(0, start)
 
-    // pre-filled
-    if (this.solution[i]) {
-      return this.fillCell(i + 1)
+    // end of the grid
+    if (i === -1) {
+      return true
     }
 
     for (const n of this.getValidValues(i)) {
       this.solution[i] = n
 
-      if (this.fillCell(i + 1)) {
+      if (this.fillBlanks(i + 1)) {
         return true
       }
     }
@@ -187,7 +184,7 @@ class Sudoku {
   private fill() {
     this.solution = Array(Sudoku.gridLength).fill(0)
     this.fillDiagonal()
-    this.fillCell(0)
+    this.fillBlanks()
   }
 
   /* ---------------------------------- clean --------------------------------- */
@@ -207,7 +204,7 @@ const s = new Sudoku()
 
 // s.print()
 
-for (let i = 0; i < 1000; i += 1) {
+for (let i = 0; i < 10000; i += 1) {
   s.create()
 }
 console.timeEnd('time')
