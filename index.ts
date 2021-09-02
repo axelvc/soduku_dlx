@@ -82,17 +82,15 @@ class Sudoku {
 
   private static getBlockIdxs(i: number): number[] {
     const { gridSize, blockSize } = Sudoku
-    const rowI = Math.floor(i / gridSize)
-    const colI = i % gridSize
-    const rowStart = Math.floor(rowI / blockSize) * blockSize
-    const colStart = Math.floor(colI / blockSize) * blockSize
-    const rowEnd = rowStart + blockSize
-    const colEnd = colStart + blockSize
+    const row = Math.floor(i / gridSize)
+    const col = i % gridSize
+    const rowStart = row - (row % blockSize)
+    const colStart = col - (col % blockSize)
 
     const idxs = []
-    for (let row = rowStart; row < rowEnd; row += 1) {
-      for (let col = colStart; col < colEnd; col += 1) {
-        idxs.push(Sudoku.getIndex(row, col))
+    for (let r = 0; r < blockSize; r += 1) {
+      for (let c = 0; c < blockSize; c += 1) {
+        idxs.push(Sudoku.getIndex(rowStart + r, colStart + c))
       }
     }
 
@@ -202,9 +200,9 @@ class Sudoku {
 console.time('time')
 const s = new Sudoku()
 
-// s.print()
+s.print()
 
-for (let i = 0; i < 10000; i += 1) {
-  s.create()
-}
+// for (let i = 0; i < 10000; i += 1) {
+//   s.create()
+// }
 console.timeEnd('time')
