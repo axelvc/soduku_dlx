@@ -1,8 +1,9 @@
 /* eslint-disable no-restricted-syntax */
 class Sudoku {
-  static blockSize = 3
-
-  static gridSize = 9
+  static size = {
+    block: 3,
+    grid: 9,
+  }
 
   solution: number[] = []
 
@@ -15,14 +16,14 @@ class Sudoku {
   }
 
   print(arr: number[] = this.solution) {
-    const { gridSize, blockSize } = Sudoku
+    const { size } = Sudoku
     const N = 23
-    const str = '─'.repeat(N / blockSize)
+    const str = '─'.repeat(N / size.block)
 
     console.log(`┌${str}┬${str}┬${str}┐`)
 
-    for (let i = 0; i < gridSize; i += 1) {
-      const n = i * gridSize
+    for (let i = 0; i < size.grid; i += 1) {
+      const n = i * size.grid
 
       console.log(
         [
@@ -51,15 +52,15 @@ class Sudoku {
   }
 
   private static getIndex(row: number, col: number): number {
-    return row * Sudoku.gridSize + col
+    return row * Sudoku.size.grid + col
   }
 
   private static getRowIdxs(i: number): number[] {
-    const { gridSize } = Sudoku
-    const row = Math.floor(i / gridSize)
+    const { size } = Sudoku
+    const row = Math.floor(i / size.grid)
 
     const idxs = []
-    for (let col = 0; col < gridSize; col += 1) {
+    for (let col = 0; col < size.grid; col += 1) {
       idxs.push(Sudoku.getIndex(row, col))
     }
 
@@ -67,11 +68,11 @@ class Sudoku {
   }
 
   private static getColIdxs(i: number): number[] {
-    const { gridSize } = Sudoku
-    const col = i % gridSize
+    const { size } = Sudoku
+    const col = i % size.grid
 
     const idxs = []
-    for (let row = 0; row < gridSize; row += 1) {
+    for (let row = 0; row < size.grid; row += 1) {
       idxs.push(Sudoku.getIndex(row, col))
     }
 
@@ -79,15 +80,15 @@ class Sudoku {
   }
 
   private static getBlockIdxs(i: number): number[] {
-    const { gridSize, blockSize } = Sudoku
-    const row = Math.floor(i / gridSize)
-    const col = i % gridSize
-    const rowStart = row - (row % blockSize)
-    const colStart = col - (col % blockSize)
+    const { size } = Sudoku
+    const row = Math.floor(i / size.grid)
+    const col = i % size.grid
+    const rowStart = row - (row % size.block)
+    const colStart = col - (col % size.block)
 
     const idxs = []
-    for (let r = 0; r < blockSize; r += 1) {
-      for (let c = 0; c < blockSize; c += 1) {
+    for (let r = 0; r < size.block; r += 1) {
+      for (let c = 0; c < size.block; c += 1) {
         idxs.push(Sudoku.getIndex(rowStart + r, colStart + c))
       }
     }
@@ -98,7 +99,7 @@ class Sudoku {
   private getValidValues(i: number): number[] {
     const nums = []
 
-    for (let n = 1; n <= Sudoku.gridSize; n += 1) {
+    for (let n = 1; n <= Sudoku.size.grid; n += 1) {
       if (this.isValid(i, n)) {
         nums.push(n)
       }
@@ -178,7 +179,7 @@ class Sudoku {
   }
 
   private fill() {
-    this.solution = Array(Sudoku.gridSize ** 2).fill(0)
+    this.solution = Array(Sudoku.size.grid ** 2).fill(0)
     this.fillDiagonal()
     this.fillBlanks()
   }
@@ -198,9 +199,9 @@ class Sudoku {
 console.time('time')
 const s = new Sudoku()
 
-s.print()
+// s.print()
 
-// for (let i = 0; i < 10000; i += 1) {
-//   s.create()
-// }
+for (let i = 0; i < 10000; i += 1) {
+  s.create()
+}
 console.timeEnd('time')
