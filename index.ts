@@ -182,14 +182,6 @@ class Sudoku {
     return data
   }
 
-  private fill() {
-    this.solution = Array(Sudoku.size.grid ** 2).fill(0)
-    this.fillDiagonal()
-    this.fillBlanks()
-    this.randomClean(30)
-  }
-
-  /* ---------------------------------- clean --------------------------------- */
   private randomClean(limit: number) {
     const indices = this.solution
       .map((_, i) => i)
@@ -211,6 +203,13 @@ class Sudoku {
         break
       }
     }
+  }
+
+  private fill() {
+    this.solution = Array(Sudoku.size.grid ** 2).fill(0)
+    this.fillDiagonal()
+    this.fillBlanks()
+    this.randomClean(30)
   }
 }
 
