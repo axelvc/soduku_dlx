@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax */
 class Sudoku {
   static size = {
     block: 3,
@@ -56,10 +55,6 @@ class Sudoku {
     // return [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5)
   }
 
-  private getRandomIndices() {
-    return this.puzzle.map((_, i) => i).sort(() => Math.random() - 0.5)
-  }
-
   private static getIndex(row: number, col: number): number {
     return row * Sudoku.size.grid + col
   }
@@ -103,6 +98,10 @@ class Sudoku {
     }
 
     return indices
+  }
+
+  private getRandomIndices() {
+    return this.puzzle.map((_, i) => i).sort(() => Math.random() - 0.5)
   }
 
   private getValidValues(i: number): number[] {

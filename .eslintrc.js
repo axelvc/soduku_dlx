@@ -13,8 +13,7 @@ module.exports = {
   rules: {
     semi: ['error', 'never'],
     'no-param-reassign': 'off',
-    'operator-linebreak': 'off',
+    'no-restricted-syntax': 'off',
     'no-console': 'off',
-    'generator-star-spacing': 'off',
   },
 }
