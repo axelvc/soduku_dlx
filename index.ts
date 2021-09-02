@@ -4,8 +4,6 @@ class Sudoku {
 
   static gridSize = 9
 
-  static gridLength = Sudoku.gridSize ** 2
-
   solution: number[] = []
 
   constructor() {
@@ -180,7 +178,7 @@ class Sudoku {
   }
 
   private fill() {
-    this.solution = Array(Sudoku.gridLength).fill(0)
+    this.solution = Array(Sudoku.gridSize ** 2).fill(0)
     this.fillDiagonal()
     this.fillBlanks()
   }
