@@ -158,50 +158,68 @@ class Sudoku {
     }
   }
 
-  private fillBlanks(start: number = 0): boolean {
+  private fillBlanks(data = { limit: 1, found: 0 }, start = 0) {
     const i = this.solution.indexOf(0, start)
 
     // end of the grid
     if (i === -1) {
-      return true
+      data.found += 1
+      return data
     }
 
     for (const n of this.getValidValues(i)) {
       this.solution[i] = n
 
-      if (this.fillBlanks(i + 1)) {
-        return true
+      this.fillBlanks(data, i)
+
+      if (data.found === data.limit) {
+        return data
       }
     }
 
     this.solution[i] = 0
-    return false
+
+    return data
   }
 
   private fill() {
     this.solution = Array(Sudoku.size.grid ** 2).fill(0)
     this.fillDiagonal()
     this.fillBlanks()
+    this.randomClean(30)
   }
 
   /* ---------------------------------- clean --------------------------------- */
-  /*
-   * TODO: Try to solve, and each iteration say to next if is the same value as the
-   * first solve, if all backtracking it's the same as the first and the current
-   * iteration is the same as the removed value then ignore the current value and
-   * continue to the next number, then return if there are another solution
-   */
-  private clean() {
-    console.log(this.solution)
+  private randomClean(limit: number) {
+    const indices = this.solution
+      .map((_, i) => i)
+      .sort(() => Math.random() - 0.5)
+
+    let removed = 0
+    for (const i of indices) {
+      const snapshot = this.solution.slice()
+
+      this.solution[i] = 0
+      if (this.fillBlanks({ limit: 2, found: 0 }).found === 1) {
+        snapshot[i] = 0
+        removed += 1
+      }
+
+      this.solution = snapshot
+
+      if (removed === limit) {
+        break
+      }
+    }
   }
 }
 
 console.time('time')
 const s = new Sudoku()
 
-// s.print()
+s.print()
 
-for (let i = 0; i < 10000; i += 1) {
-  s.create()
-}
+// for (let i = 0; i < 1000; i += 1) {
+//   s.create()
+// }
 console.timeEnd('time')
