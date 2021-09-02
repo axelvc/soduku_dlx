@@ -12,7 +12,10 @@ class Sudoku {
   }
 
   create() {
-    this.fill()
+    this.cleanGrid()
+    this.fillDiagonal()
+    this.fillBlanks()
+    this.randomClean(30)
   }
 
   print(arr: number[] = this.solution) {
@@ -108,6 +111,35 @@ class Sudoku {
     return nums
   }
 
+  private getSolutions(
+    limit: number = Infinity,
+    found: number[][] = [],
+    start: number = 0,
+  ): number[][] {
+    const i = this.solution.indexOf(0, start)
+
+    // end of the grid
+    if (i === -1) {
+      found.push(this.solution.slice())
+
+      return found
+    }
+
+    for (const n of this.getValidValues(i)) {
+      this.solution[i] = n
+
+      this.getSolutions(limit, found, i)
+
+      if (found.length >= limit) {
+        break
+      }
+    }
+
+    this.solution[i] = 0
+
+    return found
+  }
+
   /* -------------------------------- valiation ------------------------------- */
   private isValidRow(i: number, n: number): boolean {
     for (const rI of Sudoku.getRowIndices(i)) {
@@ -146,6 +178,10 @@ class Sudoku {
   }
 
   /* ---------------------------------- fill ---------------------------------- */
+  private cleanGrid() {
+    this.solution = Array(Sudoku.size.grid ** 2).fill(0)
+  }
+
   private fillDiagonal() {
     const blocks = [0, 30, 60].map(Sudoku.getBlockIdices)
 
@@ -158,28 +194,10 @@ class Sudoku {
     }
   }
 
-  private fillBlanks(data = { limit: 1, found: 0 }, start = 0) {
-    const i = this.solution.indexOf(0, start)
+  private fillBlanks() {
+    const [solution] = this.getSolutions(1)
 
-    // end of the grid
-    if (i === -1) {
-      data.found += 1
-      return data
-    }
-
-    for (const n of this.getValidValues(i)) {
-      this.solution[i] = n
-
-      this.fillBlanks(data, i)
-
-      if (data.found === data.limit) {
-        return data
-      }
-    }
-
-    this.solution[i] = 0
-
-    return data
+    this.solution = solution
   }
 
   private randomClean(limit: number) {
@@ -192,7 +210,7 @@ class Sudoku {
       const snapshot = this.solution.slice()
 
       this.solution[i] = 0
-      if (this.fillBlanks({ limit: 2, found: 0 }).found === 1) {
+      if (this.getSolutions(2).length === 1) {
         snapshot[i] = 0
         removed += 1
       }
@@ -203,13 +221,6 @@ class Sudoku {
         break
       }
     }
-  }
-
-  private fill() {
-    this.solution = Array(Sudoku.size.grid ** 2).fill(0)
-    this.fillDiagonal()
-    this.fillBlanks()
-    this.randomClean(30)
   }
 }
 
