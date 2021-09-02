@@ -55,45 +55,45 @@ class Sudoku {
     return row * Sudoku.size.grid + col
   }
 
-  private static getRowIdxs(i: number): number[] {
+  private static getRowIndices(i: number): number[] {
     const { size } = Sudoku
     const row = Math.floor(i / size.grid)
 
-    const idxs = []
+    const arr = []
     for (let col = 0; col < size.grid; col += 1) {
-      idxs.push(Sudoku.getIndex(row, col))
+      arr.push(Sudoku.getIndex(row, col))
     }
 
-    return idxs
+    return arr
   }
 
-  private static getColIdxs(i: number): number[] {
+  private static getColIndices(i: number): number[] {
     const { size } = Sudoku
     const col = i % size.grid
 
-    const idxs = []
+    const arr = []
     for (let row = 0; row < size.grid; row += 1) {
-      idxs.push(Sudoku.getIndex(row, col))
+      arr.push(Sudoku.getIndex(row, col))
     }
 
-    return idxs
+    return arr
   }
 
-  private static getBlockIdxs(i: number): number[] {
+  private static getBlockIdices(i: number): number[] {
     const { size } = Sudoku
     const row = Math.floor(i / size.grid)
     const col = i % size.grid
     const rowStart = row - (row % size.block)
     const colStart = col - (col % size.block)
 
-    const idxs = []
+    const arr = []
     for (let r = 0; r < size.block; r += 1) {
       for (let c = 0; c < size.block; c += 1) {
-        idxs.push(Sudoku.getIndex(rowStart + r, colStart + c))
+        arr.push(Sudoku.getIndex(rowStart + r, colStart + c))
       }
     }
 
-    return idxs
+    return arr
   }
 
   private getValidValues(i: number): number[] {
@@ -110,7 +110,7 @@ class Sudoku {
 
   /* -------------------------------- valiation ------------------------------- */
   private isValidRow(i: number, n: number): boolean {
-    for (const rI of Sudoku.getRowIdxs(i)) {
+    for (const rI of Sudoku.getRowIndices(i)) {
       if (this.solution[rI] === n) {
         return false
       }
@@ -120,7 +120,7 @@ class Sudoku {
   }
 
   private isValidCol(i: number, n: number): boolean {
-    for (const cI of Sudoku.getColIdxs(i)) {
+    for (const cI of Sudoku.getColIndices(i)) {
       if (this.solution[cI] === n) {
         return false
       }
@@ -130,7 +130,7 @@ class Sudoku {
   }
 
   private isValidBlock(i: number, n: number): boolean {
-    for (const bI of Sudoku.getBlockIdxs(i)) {
+    for (const bI of Sudoku.getBlockIdices(i)) {
       if (this.solution[bI] === n) {
         return false
       }
@@ -147,7 +147,7 @@ class Sudoku {
 
   /* ---------------------------------- fill ---------------------------------- */
   private fillDiagonal() {
-    const blocks = [0, 30, 60].map(Sudoku.getBlockIdxs)
+    const blocks = [0, 30, 60].map(Sudoku.getBlockIdices)
 
     for (const block of blocks) {
       const nums = Sudoku.randomNums()
