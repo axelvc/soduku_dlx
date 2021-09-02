@@ -59,24 +59,24 @@ class Sudoku {
     const { size } = Sudoku
     const row = Math.floor(i / size.grid)
 
-    const arr = []
+    const indices = []
     for (let col = 0; col < size.grid; col += 1) {
-      arr.push(Sudoku.getIndex(row, col))
+      indices.push(Sudoku.getIndex(row, col))
     }
 
-    return arr
+    return indices
   }
 
   private static getColIndices(i: number): number[] {
     const { size } = Sudoku
     const col = i % size.grid
 
-    const arr = []
+    const indices = []
     for (let row = 0; row < size.grid; row += 1) {
-      arr.push(Sudoku.getIndex(row, col))
+      indices.push(Sudoku.getIndex(row, col))
     }
 
-    return arr
+    return indices
   }
 
   private static getBlockIdices(i: number): number[] {
@@ -86,14 +86,14 @@ class Sudoku {
     const rowStart = row - (row % size.block)
     const colStart = col - (col % size.block)
 
-    const arr = []
+    const indices = []
     for (let r = 0; r < size.block; r += 1) {
       for (let c = 0; c < size.block; c += 1) {
-        arr.push(Sudoku.getIndex(rowStart + r, colStart + c))
+        indices.push(Sudoku.getIndex(rowStart + r, colStart + c))
       }
     }
 
-    return arr
+    return indices
   }
 
   private getValidValues(i: number): number[] {
