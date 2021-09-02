@@ -5,6 +5,8 @@ class Sudoku {
     grid: 9,
   }
 
+  puzzle: number[] = []
+
   solution: number[] = []
 
   constructor() {
@@ -18,7 +20,7 @@ class Sudoku {
     this.randomClean(30)
   }
 
-  print(arr: number[] = this.solution) {
+  print(arr: number[] = this.puzzle) {
     const { size } = Sudoku
     const N = 23
     const str = '─'.repeat(N / size.block)
@@ -52,6 +54,10 @@ class Sudoku {
   private static randomNums(): number[] {
     return [5, 4, 3, 8, 9, 7, 2, 1, 6]
     // return [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5)
+  }
+
+  private getRandomIndices() {
+    return this.puzzle.map((_, i) => i).sort(() => Math.random() - 0.5)
   }
 
   private static getIndex(row: number, col: number): number {
@@ -116,17 +122,17 @@ class Sudoku {
     found: number[][] = [],
     start: number = 0,
   ): number[][] {
-    const i = this.solution.indexOf(0, start)
+    const i = this.puzzle.indexOf(0, start)
 
     // end of the grid
     if (i === -1) {
-      found.push(this.solution.slice())
+      found.push(this.puzzle.slice())
 
       return found
     }
 
     for (const n of this.getValidValues(i)) {
-      this.solution[i] = n
+      this.puzzle[i] = n
 
       this.getSolutions(limit, found, i)
 
@@ -135,7 +141,7 @@ class Sudoku {
       }
     }
 
-    this.solution[i] = 0
+    this.puzzle[i] = 0
 
     return found
   }
@@ -143,7 +149,7 @@ class Sudoku {
   /* -------------------------------- valiation ------------------------------- */
   private isValidRow(i: number, n: number): boolean {
     for (const rI of Sudoku.getRowIndices(i)) {
-      if (this.solution[rI] === n) {
+      if (this.puzzle[rI] === n) {
         return false
       }
     }
@@ -153,7 +159,7 @@ class Sudoku {
 
   private isValidCol(i: number, n: number): boolean {
     for (const cI of Sudoku.getColIndices(i)) {
-      if (this.solution[cI] === n) {
+      if (this.puzzle[cI] === n) {
         return false
       }
     }
@@ -163,7 +169,7 @@ class Sudoku {
 
   private isValidBlock(i: number, n: number): boolean {
     for (const bI of Sudoku.getBlockIdices(i)) {
-      if (this.solution[bI] === n) {
+      if (this.puzzle[bI] === n) {
         return false
       }
     }
@@ -179,7 +185,9 @@ class Sudoku {
 
   /* ---------------------------------- fill ---------------------------------- */
   private cleanGrid() {
-    this.solution = Array(Sudoku.size.grid ** 2).fill(0)
+    const length = Sudoku.size.grid ** 2
+
+    this.puzzle = Array(length).fill(0)
   }
 
   private fillDiagonal() {
@@ -189,7 +197,7 @@ class Sudoku {
       const nums = Sudoku.randomNums()
 
       for (const i of block) {
-        this.solution[i] = nums.pop()!
+        this.puzzle[i] = nums.pop()!
       }
     }
   }
@@ -197,25 +205,23 @@ class Sudoku {
   private fillBlanks() {
     const [solution] = this.getSolutions(1)
 
-    this.solution = solution
+    this.puzzle = solution
   }
 
   private randomClean(limit: number) {
-    const indices = this.solution
-      .map((_, i) => i)
-      .sort(() => Math.random() - 0.5)
+    this.solution = this.puzzle.slice()
 
     let removed = 0
-    for (const i of indices) {
-      const snapshot = this.solution.slice()
+    for (const i of this.getRandomIndices()) {
+      const snapshot = this.puzzle[i]
 
-      this.solution[i] = 0
-      if (this.getSolutions(2).length === 1) {
-        snapshot[i] = 0
+      this.puzzle[i] = 0
+
+      if (this.getSolutions(2).length > 1) {
+        this.puzzle[i] = snapshot
+      } else {
         removed += 1
       }
-
-      this.solution = snapshot
 
       if (removed === limit) {
         break
@@ -228,6 +234,7 @@ console.time('time')
 const s = new Sudoku()
 
 s.print()
+s.print(s.solution)
 
 // for (let i = 0; i < 1000; i += 1) {
 //   s.create()
