@@ -14,6 +14,8 @@ module.exports = {
     semi: ['error', 'never'],
     'no-param-reassign': 'off',
     'no-restricted-syntax': 'off',
+    'import/no-unresolved': 'off',
+    'import/extensions': 'off',
     'no-console': 'off',
   },
 }
