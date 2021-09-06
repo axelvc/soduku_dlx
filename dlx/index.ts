@@ -8,7 +8,7 @@ function getSolutions(
   stack: number[] = [],
 ) {
   if (root.right === root) {
-    solutions.push([...stack].sort())
+    solutions.push([...stack].sort((a, b) => a - b))
 
     return solutions
   }
