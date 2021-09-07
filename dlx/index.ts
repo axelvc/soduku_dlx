@@ -1,5 +1,5 @@
-import makeMatrix from './matrix'
-import Node from './Node'
+import makeMatrix from './matrix.ts'
+import Node from './Node.ts'
 
 function getSolutions(
   root: Node,
