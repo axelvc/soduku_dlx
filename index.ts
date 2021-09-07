@@ -142,10 +142,6 @@ class Sudoku {
     const mI = this.matrix.findIndex((r) => r[i] === n)
     const mIStart = mI - n + 1
 
-    if (mI === -1) {
-      console.log('remove fail:', { n, row, col })
-    }
-
     const mRow = this.matrix[mI]
 
     this.matrixDeleteHistory[i] = this.matrix.splice(mIStart, Sudoku.size.row, mRow)
@@ -154,10 +150,6 @@ class Sudoku {
   private restoreToMatrix(n: number, row: number, col: number) {
     const i = Sudoku.getIndex(row, col)
     const mI = this.matrix.findIndex((r) => r[i] === n)
-
-    if (mI === -1) {
-      console.log('restore fail:', { n, row, col })
-    }
 
     this.matrix.splice(mI, 1, ...this.matrixDeleteHistory[i])
   }
