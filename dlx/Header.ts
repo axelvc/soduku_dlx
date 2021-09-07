@@ -19,7 +19,7 @@ export default class Header extends NodeBase {
 
   /* ---------------------------------- utils --------------------------------- */
   minColumn(): Header {
-    return this.nodesRight<Header>().reduce((a, b) => (a.count < b.count ? a : b))
+    return this.nodesRight<Header>().reduce((a, b) => (a.count > b.count ? b : a))
   }
 
   /* --------------------------------- insert --------------------------------- */

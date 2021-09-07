@@ -22,6 +22,8 @@ class Sudoku {
 
   solution: number[][] = []
 
+  cellToRemove = 35
+
   constructor() {
     this.create()
   }
@@ -30,7 +32,7 @@ class Sudoku {
     this.cleanGrid()
     this.fillDiagonal()
     this.fillBlanks()
-    this.randomClean(35)
+    this.randomClean()
   }
 
   print(matrix: number[][] = this.puzzle) {
@@ -212,7 +214,7 @@ class Sudoku {
     })
   }
 
-  private randomClean(limit: number) {
+  private randomClean() {
     this.solution = this.puzzle.slice()
 
     let removed = 0
@@ -231,7 +233,7 @@ class Sudoku {
         removed += 1
       }
 
-      if (removed === limit) {
+      if (removed === this.cellToRemove) {
         break
       }
     }
