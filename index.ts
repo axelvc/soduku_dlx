@@ -6,7 +6,7 @@ class Sudoku {
     block: 3,
   }
 
-  static matrixBase: number[][] = Sudoku.makeMatrix()
+  static matrixBase: number[][] = Sudoku.makeDlxMatrix()
 
   matrix: number[][] = Sudoku.matrixBase.slice()
 
@@ -23,7 +23,7 @@ class Sudoku {
   }
 
   create() {
-    this.cleanGrid()
+    this.cleanData()
     this.fillDiagonal()
     this.fillBlanks()
     this.randomClean()
@@ -58,47 +58,87 @@ class Sudoku {
   }
 
   /* ---------------------------------- utils --------------------------------- */
-  private static getSize() {
-    return Sudoku.size.side ** 2
+
+  private static randomNums(): number[] {
+    return Array(Sudoku.size.side)
+      .fill(0)
+      .map((_, i) => i + 1)
+      .sort(() => Math.random() - 0.5)
+  }
+
+  private static getEmptyArray(): number[] {
+    const length = Sudoku.size.side ** 2
+
+    return Array(length).fill(0)
+  }
+
+  private static getRandomIndices(): number[] {
+    return Sudoku.getEmptyArray()
+      .map((_, i) => i)
+      .sort(() => Math.random() - 0.5)
   }
 
   private static getIndex(row: number, col: number): number {
     return row * Sudoku.size.side + col
   }
 
-  private static makeMatrixRow(n: number, row: number, col: number): number[] {
-    const { size } = Sudoku
-    const length = Sudoku.getSize()
-    const rowArr: number[] = Array(length * 4).fill(0)
+  /* ------------------------------- dlx-matrix ------------------------------- */
+  private static indexConstraint(n: number, row: number, col: number): number[] {
+    const constraint = Sudoku.getEmptyArray()
+    const i = Sudoku.getIndex(row, col)
 
-    const rowBreak = length
-    const colBreak = length * 2
-    const blockBreak = length * 3
+    constraint[i] = n
+
+    return constraint
+  }
+
+  private static rowConstraint(n: number, row: number): number[] {
+    const constraint = Sudoku.getEmptyArray()
+
+    constraint[Sudoku.size.side * row + n - 1] = n
+
+    return constraint
+  }
+
+  private static colConstraint(n: number, col: number): number[] {
+    const constraint = Sudoku.getEmptyArray()
+
+    constraint[Sudoku.size.side * col + n - 1] = n
+
+    return constraint
+  }
+
+  private static blockConstraint(n: number, row: number, col: number): number[] {
+    const { size } = Sudoku
+    const constraint = Sudoku.getEmptyArray()
 
     const blockRow = Math.floor(row / size.block) * size.block
     const blockCol = Math.floor(col / size.block) * size.side
 
-    const rI = Sudoku.getIndex(row, col)
-    const i = n - 1
+    constraint[size.side * blockRow + blockCol + n - 1] = n
 
-    rowArr[rI] = n
-    rowArr[size.side * row + rowBreak + i] = n
-    rowArr[size.side * col + colBreak + i] = n
-    rowArr[size.side * blockRow + blockCol + blockBreak + i] = n
-
-    return rowArr
+    return constraint
   }
 
-  private static makeMatrix(): number[][] {
+  private static makeConstraints(n: number, row: number, col: number): number[] {
+    return [
+      ...Sudoku.indexConstraint(n, row, col),
+      ...Sudoku.rowConstraint(n, row),
+      ...Sudoku.colConstraint(n, col),
+      ...Sudoku.blockConstraint(n, row, col),
+    ]
+  }
+
+  private static makeDlxMatrix(): number[][] {
     const { size } = Sudoku
     const matrix: number[][] = []
 
     for (let row = 0; row < size.side; row += 1) {
       for (let col = 0; col < size.side; col += 1) {
         for (let n = 1; n <= size.side; n += 1) {
-          const arr = Sudoku.makeMatrixRow(n, row, col)
+          const constraints = Sudoku.makeConstraints(n, row, col)
 
-          matrix.push(arr)
+          matrix.push(constraints)
         }
       }
     }
@@ -106,18 +146,7 @@ class Sudoku {
     return matrix
   }
 
-  private static randomNums(): number[] {
-    // return [5, 4, 3, 8, 9, 7, 2, 1, 6]
-    return Array(Sudoku.size.side)
-      .fill(0)
-      .map((_, i) => i + 1)
-      .sort(() => Math.random() - 0.5)
-  }
-
-  private getRandomIndices(): number[] {
-    return this.puzzle.map((_, i) => i).sort(() => Math.random() - 0.5)
-  }
-
+  /* --------------------------- posibilities matrix -------------------------- */
   private removeFromMatrix(n: number, i: number) {
     const mI = this.matrix.findIndex((r) => r[i] === n)
     const mIStart = mI - n + 1
@@ -134,24 +163,23 @@ class Sudoku {
   }
 
   /* ---------------------------------- fill ---------------------------------- */
-  private cleanGrid() {
+  private cleanData() {
+    this.puzzle = Sudoku.getEmptyArray()
     this.matrix = Sudoku.matrixBase.slice()
     this.matrixDeleteHistory = {}
-
-    this.puzzle = Array(Sudoku.getSize()).fill(0)
   }
 
   private fillDiagonal() {
     const { size } = Sudoku
 
-    for (let j = 0; j < size.block; j += 1) {
+    for (let bI = 0; bI < size.block; bI += 1) {
       const nums = Sudoku.randomNums()
-      const start = j * size.block
+      const blockStart = bI * size.block
 
       for (let row = 0; row < size.block; row += 1) {
         for (let col = 0; col < size.block; col += 1) {
           const n = nums.pop()!
-          const i = Sudoku.getIndex(start + row, start + col)
+          const i = Sudoku.getIndex(blockStart + row, blockStart + col)
 
           this.puzzle[i] = n
           this.removeFromMatrix(n, i)
@@ -163,12 +191,12 @@ class Sudoku {
   private fillBlanks() {
     const [solution] = dlxSolve(this.matrix, 1)
 
-    // set puzzle values
+    // set solution
     solution.forEach((mI, i) => {
       this.puzzle[i] = this.matrix[mI][i]
     })
 
-    // remove values from matrix
+    // remove values from dlx-matrix
     solution.forEach((_, i) => {
       if (!this.matrixDeleteHistory[i]) {
         this.removeFromMatrix(this.puzzle[i], i)
@@ -180,7 +208,7 @@ class Sudoku {
     this.solution = this.puzzle.slice()
 
     let removed = 0
-    for (const i of this.getRandomIndices()) {
+    for (const i of Sudoku.getRandomIndices()) {
       const snapshot = this.puzzle[i]
 
       this.puzzle[i] = 0
