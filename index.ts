@@ -146,11 +146,7 @@ class Sudoku {
 
     const mRow = this.matrix[mI]
 
-    this.matrixDeleteHistory[i] = this.matrix.splice(
-      mIStart,
-      Sudoku.size.row,
-      mRow,
-    )
+    this.matrixDeleteHistory[i] = this.matrix.splice(mIStart, Sudoku.size.row, mRow)
   }
 
   private restoreToMatrix(n: number, row: number, col: number) {
@@ -245,9 +241,9 @@ class Sudoku {
 console.time('time')
 const s1 = new Sudoku()
 
-// s1.print()
+s1.print()
 
-for (let i = 0; i < 1000; i += 1) {
-  s1.create()
-}
+// for (let i = 0; i < 1000; i += 1) {
+//   s1.create()
+// }
 console.timeEnd('time')

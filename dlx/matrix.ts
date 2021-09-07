@@ -1,44 +1,27 @@
 import Node from './Node.ts'
+import Header from './Header.ts'
 
-function makeHeader(root: Node): Node {
-  const header = new Node()
+export default function makeMatrix(matrix: number[][]): Header {
+  const root = new Header()
+  const headers: Header[] = []
 
-  root.addHorizontal(header)
-
-  return header
-}
-
-function makeNode(row: number, header: Node, rowFirst?: Node): Node {
-  const node = new Node(row, header)
-
-  header.addVertical(node)
-
-  if (rowFirst) {
-    rowFirst.addHorizontal(node)
-  }
-
-  return node
-}
-
-export default function makeMatrix(matrix: number[][]): Node {
-  const root = new Node()
-  const headers: Node[] = []
-
-  matrix.forEach((row, rowI) => {
-    let rowFirst: Node | undefined
+  matrix.forEach((row, rI) => {
+    let firstAtRow: Node | undefined
 
     row.forEach((cell, colI) => {
       // create header
-      if (rowI === 0) {
-        headers.push(makeHeader(root))
+      if (rI === 0) {
+        const header = new Header(root)
+
+        headers.push(header)
       }
 
       // create node
       if (cell) {
         const header = headers[colI]
-        const node = makeNode(rowI, header, rowFirst)
+        const node = new Node(rI, header, firstAtRow)
 
-        rowFirst = rowFirst || node
+        firstAtRow = firstAtRow || node
       }
     })
   })

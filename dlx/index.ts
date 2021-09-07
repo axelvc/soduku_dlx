@@ -1,34 +1,34 @@
 import makeMatrix from './matrix.ts'
-import Node from './Node.ts'
+import Header from './Header.ts'
 
 function getSolutions(
-  root: Node,
+  root: Header,
   limit: number,
   solutions: number[][] = [],
   stack: number[] = [],
 ) {
   if (root.right === root) {
-    solutions.push([...stack].sort((a, b) => a - b))
+    solutions.push(stack.slice().sort((a, b) => a - b))
 
     return solutions
   }
 
-  const header = root.minColumn
+  const header = root.minColumn()
 
   header.cover()
 
-  header.nodesDown.forEach((rowNode) => {
+  header.nodesDown().forEach((rowNode) => {
     if (solutions.length >= limit) {
       return
     }
 
-    rowNode.nodesRight.forEach((node) => node.cover())
+    rowNode.nodesRight().forEach((node) => node.header.cover())
 
     stack.push(rowNode.row)
     getSolutions(root, limit, solutions, stack)
     stack.pop()
 
-    rowNode.nodesRight.forEach((node) => node.uncover())
+    rowNode.nodesRight().forEach((node) => node.header.uncover())
   })
 
   header.uncover()
