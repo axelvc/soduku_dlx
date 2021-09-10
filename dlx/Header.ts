@@ -1,29 +1,17 @@
 import NodeBase from './NodeBase.ts'
 
 export default class Header extends NodeBase {
-  row = -1
+  root: Header
 
   count = 0
-
-  root: Header = this
 
   constructor(root?: Header) {
     super()
 
-    if (root) {
-      this.root = root
-    }
-
-    this.root.addToRow(this)
+    this.root = root || this
   }
 
-  /* ---------------------------------- utils --------------------------------- */
-  minColumn(): Header {
-    return this.nodesRight<Header>().reduce((a, b) => (a.count > b.count ? b : a))
-  }
-
-  /* --------------------------------- insert --------------------------------- */
-  addToCol(node: NodeBase) {
+  addDown(node: NodeBase) {
     const last = this.up
 
     last.down = node
@@ -35,30 +23,48 @@ export default class Header extends NodeBase {
   }
 
   /* ---------------------------------- cover --------------------------------- */
-  cover() {
+  coverCol() {
     this.right.left = this.left
     this.left.right = this.right
 
+    this.count -= 1
+  }
+
+  uncoverCol() {
+    this.right.left = this
+    this.left.right = this
+
+    this.count += 1
+  }
+
+  coverRow() {
+    this.nodesRight().forEach((node) => {
+      node.coverUpDown()
+    })
+  }
+
+  uncoverRow() {
+    this.nodesRight().forEach((node) => {
+      node.uncoverUpDown()
+    })
+  }
+
+  cover() {
+    this.coverCol()
+
     this.nodesDown().forEach((rowNode) => {
       rowNode.nodesRight().forEach((node) => {
-        node.up.down = node.down
-        node.down.up = node.up
-
-        node.header.count -= 1
+        node.coverUpDown()
       })
     })
   }
 
   uncover() {
-    this.right.left = this
-    this.left.right = this
+    this.uncoverCol()
 
     this.nodesDown().forEach((rowNode) => {
       rowNode.nodesRight().forEach((node) => {
-        node.up.down = node
-        node.down.up = node
-
-        node.header.count += 1
+        node.uncoverUpDown()
       })
     })
   }

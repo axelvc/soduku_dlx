@@ -1,14 +1,12 @@
-import dlxSolve from './dlx/index.ts'
+import Dlx from './dlx/index.ts'
 
-class Sudoku {
+export default class Sudoku {
   static size = {
     side: 9,
     block: 3,
   }
 
-  static matrixBase: number[][] = Sudoku.makeDlxMatrix()
-
-  matrix: number[][] = Sudoku.matrixBase.slice()
+  dlx: Dlx = Sudoku.makeDlxMatrix()
 
   matrixDeleteHistory: Record<number, number[][]> = {}
 
@@ -60,10 +58,11 @@ class Sudoku {
   /* ---------------------------------- utils --------------------------------- */
 
   private static randomNums(): number[] {
-    return Array(Sudoku.size.side)
-      .fill(0)
-      .map((_, i) => i + 1)
-      .sort(() => Math.random() - 0.5)
+    return [5, 6, 3, 9, 8, 2, 7, 4, 1]
+    // return Array(Sudoku.size.side)
+    //   .fill(0)
+    //   .map((_, i) => i + 1)
+    //   .sort(() => Math.random() - 0.5)
   }
 
   private static getEmptyArray(): number[] {
@@ -83,7 +82,11 @@ class Sudoku {
   }
 
   /* ------------------------------- dlx-matrix ------------------------------- */
-  private static indexConstraint(n: number, row: number, col: number): number[] {
+  private static indexConstraint(
+    n: number,
+    row: number,
+    col: number,
+  ): number[] {
     const constraint = Sudoku.getEmptyArray()
     const i = Sudoku.getIndex(row, col)
 
@@ -108,7 +111,11 @@ class Sudoku {
     return constraint
   }
 
-  private static blockConstraint(n: number, row: number, col: number): number[] {
+  private static blockConstraint(
+    n: number,
+    row: number,
+    col: number,
+  ): number[] {
     const { size } = Sudoku
     const constraint = Sudoku.getEmptyArray()
 
@@ -120,7 +127,11 @@ class Sudoku {
     return constraint
   }
 
-  private static makeConstraints(n: number, row: number, col: number): number[] {
+  private static makeConstraints(
+    n: number,
+    row: number,
+    col: number,
+  ): number[] {
     return [
       ...Sudoku.indexConstraint(n, row, col),
       ...Sudoku.rowConstraint(n, row),
@@ -129,7 +140,7 @@ class Sudoku {
     ]
   }
 
-  private static makeDlxMatrix(): number[][] {
+  private static makeDlxMatrix(): Dlx {
     const { size } = Sudoku
     const matrix: number[][] = []
 
@@ -143,29 +154,33 @@ class Sudoku {
       }
     }
 
-    return matrix
+    return new Dlx(matrix)
   }
 
   /* --------------------------- posibilities matrix -------------------------- */
-  private removeFromMatrix(n: number, i: number) {
-    const mI = this.matrix.findIndex((r) => r[i] === n)
+  private removeFromMatrix(i: number, n: number) {
+    const mI = this.dlx.matrix.findIndex((r) => r[i] === n)
     const mIStart = mI - n + 1
 
-    const mRow = this.matrix[mI]
+    const mRow = this.dlx.matrix[mI]
 
-    this.matrixDeleteHistory[i] = this.matrix.splice(mIStart, Sudoku.size.side, mRow)
+    this.matrixDeleteHistory[i] = this.dlx.matrix.splice(
+      mIStart,
+      Sudoku.size.side,
+      mRow,
+    )
   }
 
-  private restoreToMatrix(n: number, i: number) {
-    const mI = this.matrix.findIndex((r) => r[i] === n)
+  private restoreToMatrix(i: number, n: number) {
+    const mI = this.dlx.matrix.findIndex((r) => r[i] === n)
 
-    this.matrix.splice(mI, 1, ...this.matrixDeleteHistory[i])
+    this.dlx.matrix.splice(mI, 1, ...this.matrixDeleteHistory[i])
   }
 
   /* ---------------------------------- fill ---------------------------------- */
   private cleanData() {
     this.puzzle = Sudoku.getEmptyArray()
-    this.matrix = Sudoku.matrixBase.slice()
+    this.dlx = Sudoku.makeDlxMatrix()
     this.matrixDeleteHistory = {}
   }
 
@@ -182,24 +197,24 @@ class Sudoku {
           const i = Sudoku.getIndex(blockStart + row, blockStart + col)
 
           this.puzzle[i] = n
-          this.removeFromMatrix(n, i)
+          this.removeFromMatrix(i, n)
         }
       }
     }
   }
 
   private fillBlanks() {
-    const [solution] = dlxSolve(this.matrix, 1)
+    const [solution] = this.dlx.solve(1)
 
     // set solution
     solution.forEach((mI, i) => {
-      this.puzzle[i] = this.matrix[mI][i]
+      this.puzzle[i] = this.dlx.matrix[mI][i]
     })
 
     // remove values from dlx-matrix
     solution.forEach((_, i) => {
       if (!this.matrixDeleteHistory[i]) {
-        this.removeFromMatrix(this.puzzle[i], i)
+        this.removeFromMatrix(i, this.puzzle[i])
       }
     })
   }
@@ -213,12 +228,12 @@ class Sudoku {
 
       this.puzzle[i] = 0
 
-      this.restoreToMatrix(snapshot, i)
-      const solutions = dlxSolve(this.matrix, 2)
+      this.restoreToMatrix(i, snapshot)
+      const solutions = this.dlx.solve(2)
 
       if (solutions.length > 1) {
         this.puzzle[i] = snapshot
-        this.removeFromMatrix(snapshot, i)
+        this.removeFromMatrix(i, snapshot)
       } else {
         removed += 1
       }
@@ -229,13 +244,3 @@ class Sudoku {
     }
   }
 }
-
-console.time('time')
-const s1 = new Sudoku()
-
-s1.print()
-
-// for (let i = 0; i < 100; i += 1) {
-//   s1.create()
-// }
-console.timeEnd('time')

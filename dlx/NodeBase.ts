@@ -9,6 +9,16 @@ export default class NodeBase {
 
   right: NodeBase = this
 
+  /* --------------------------------- insert --------------------------------- */
+  addRight(node: NodeBase) {
+    const last = this.left
+
+    last.right = node
+    node.left = last
+    node.right = this
+    this.left = node
+  }
+
   /* ---------------------------------- utils --------------------------------- */
   nodesRight<T = Node>(): T[] {
     const nodes: T[] = []
@@ -28,15 +38,5 @@ export default class NodeBase {
     }
 
     return nodes
-  }
-
-  /* --------------------------------- insert --------------------------------- */
-  addToRow(node: NodeBase) {
-    const last = this.left
-
-    last.right = node
-    node.left = last
-    node.right = this
-    this.left = node
   }
 }

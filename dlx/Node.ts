@@ -6,15 +6,26 @@ export default class Node extends NodeBase {
 
   row: number
 
-  constructor(row: number, header: Header, firstAtRow?: Node) {
+  constructor(row: number, header: Header) {
     super()
+
     this.row = row
+
     this.header = header
+  }
 
-    header.addToCol(this)
+  /* ---------------------------------- cover --------------------------------- */
+  coverUpDown() {
+    this.up.down = this.down
+    this.down.up = this.up
 
-    if (firstAtRow) {
-      firstAtRow.addToRow(this)
-    }
+    this.header.count -= 1
+  }
+
+  uncoverUpDown() {
+    this.up.down = this
+    this.down.up = this
+
+    this.header.count += 1
   }
 }
